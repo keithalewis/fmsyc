@@ -9,6 +9,7 @@ void test_fms_pwflat()
     using namespace fms::pwflat;
 
     T eps = std::numeric_limits<T>::epsilon();
+    eps = eps;
     std::vector<T> t{ 1,2,3 }, f{ T(.1),T(.2),T(.3) };
     std::vector<T> t_2{ 1 }, f_2{ T(.1) };
 
@@ -81,7 +82,7 @@ void test_fms_pwflat()
         u = 2.5;
         assert(T(.1) + T(.2) + T(.3)*T(.5) == integral(u, t.size(), t.data(), f.data()));
         u = 3;
-        assert(fabs(T(.1) + T(.2) + T(.3) - integral(u, t.size(), t.data(), f.data())) < 2*eps);
+        assert(fabs(T(.1) + T(.2) + T(.3) - integral(u, t.size(), t.data(), f.data())) < 2 * eps);
         //		assert (.1 + .2 + .3 != .6); 
     }
     { // discount
@@ -92,16 +93,16 @@ void test_fms_pwflat()
                 assert(isnan(discount(u_[i], t.size(), t.data(), f.data())));
             }
             else {
-                assert(fabs(exp(-f_[i]) - discount(u_[i], t.size(), t.data(), f.data())) < 2*eps);
+                assert(fabs(exp(-f_[i]) - discount(u_[i], t.size(), t.data(), f.data())) < 2 * eps);
             }
         }
 
-        for (int i = 0; i < sizeof(u_)/sizeof(u_[0]); i++) {
+        for (int i = 0; i < sizeof(u_) / sizeof(u_[0]); i++) {
             if (i == 0) {
                 assert(isnan(discount(u_[i], t.size(), t.data(), f.data(), T(0.2))));
             }
             else {
-                assert(fabs(exp(-f_[i]) - discount(u_[i], t.size(), t.data(), f.data(), T(0.2))) < 2*eps);
+                assert(fabs(exp(-f_[i]) - discount(u_[i], t.size(), t.data(), f.data(), T(0.2))) < 2 * eps);
             }
         }
     }
@@ -113,12 +114,12 @@ void test_fms_pwflat()
                 assert(isnan(spot(u_[i], t.size(), t.data(), f.data())));
             }
             else {
-                assert(fabs(f_[i] - spot(u_[i], t.size(), t.data(), f.data())) < 2*eps);
+                assert(fabs(f_[i] - spot(u_[i], t.size(), t.data(), f.data())) < 2 * eps);
             }
         }
 
         for (int i = 0; i < sizeof(u_) / sizeof(u_[0]); i++) {
-            assert(fabs(f_[i] - spot(u_[i], t.size(), t.data(), f.data(), T(0.2))) < 2*eps);
+            assert(fabs(f_[i] - spot(u_[i], t.size(), t.data(), f.data(), T(0.2))) < 2 * eps);
         }
     }
     { // present_value
@@ -138,15 +139,11 @@ void test_fms_pwflat()
         for (int i = 0; i < 5; i++) {
             sum += c_[i] * d_[i];
             if (i == 4) {
-                T tmp = present_value<T, T>(i + 1, u_, c_, t.size(), t.data(), f.data(), T(0.2));
-                assert(tmp == tmp);
-                assert(fabs(sum - present_value(i + 1, u_, c_, t.size(), t.data(), f.data(), T(0.2))) < 2*eps);
+                assert(fabs(sum - present_value(i + 1, u_, c_, t.size(), t.data(), f.data(), T(0.2))) < 2 * eps);
                 assert(isnan(present_value(i + 1, u_, c_, t.size(), t.data(), f.data())));
             }
             else {
-                T tmp = present_value<T, T>(i + 1, u_, c_, t.size(), t.data(), f.data(), T(0.2));
-                assert(tmp == tmp);
-                assert(fabs(sum - present_value(i + 1, u_, c_, t.size(), t.data(), f.data(), T(0.2))) < 2*eps);
+                assert(fabs(sum - present_value(i + 1, u_, c_, t.size(), t.data(), f.data(), T(0.2))) < 2 * eps);
                 assert(fabs(sum - present_value(i + 1, u_, c_, t.size(), t.data(), f.data())) < 1e-10);
             }
         }

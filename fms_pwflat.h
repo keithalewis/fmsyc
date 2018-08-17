@@ -17,12 +17,8 @@
 #include <algorithm> // adjacent_find
 #include <limits>    // quiet_Nan()
 #include <numeric>   // upper/lower_bound
-#include <gsl/span>
 
 namespace fms::pwflat {
-
-    template<class X>
-    constexpr X NaN() { return std::numeric_limits<X>::quiet_NaN(); }
 
     // strictly increasing values
     template<class T>
@@ -35,10 +31,12 @@ namespace fms::pwflat {
     // return f[i] if t[i-1] < u <= t[i], _f if u > t[n-1]
     // assumes t[i] monotonically increasing
     template<class T, class F>
-    inline F value(const T& u, size_t n, const T* t, const F* f, const F& _f = NaN<F>()) noexcept
+    inline F value(const T& u, size_t n, const T* t, const F* f, 
+        const F& _f = std::numeric_limits<F>::quiet_NaN()) noexcept
     {
-        if (u < 0)
-            return NaN<F>();
+        if (u < 0 || !strictly_increasing(n, t))
+            return std::numeric_limits<F>::quiet_NaN();
+
         if (n == 0)
             return _f;
 
@@ -49,10 +47,11 @@ namespace fms::pwflat {
 
     // int_0^u f(t) dt
     template<class T, class F>
-    inline F integral(const T& u, size_t n, const T* t, const F* f, const F& _f = std::numeric_limits<F>::quiet_NaN()) noexcept
+    inline F integral(const T& u, size_t n, const T* t, const F* f, 
+        const F& _f = std::numeric_limits<F>::quiet_NaN()) noexcept
     {
-        if (u < 0)
-            return NaN<F>();
+        if (u < 0 || !strictly_increasing(n, t))
+            return std::numeric_limits<F>::quiet_NaN();
 
         F I{ 0 };
         T t_{ 0 };
@@ -69,14 +68,16 @@ namespace fms::pwflat {
 
     // discount D(u) = exp(-int_0^u f(t) dt)
     template<class T, class F>
-    inline F discount(const T& u, size_t n, const T* t, const F* f, const F& _f = std::numeric_limits<F>::quiet_NaN()) noexcept
+    inline F discount(const T& u, size_t n, const T* t, const F* f, 
+        const F& _f = std::numeric_limits<F>::quiet_NaN()) noexcept
     {
         return exp(-integral(u, n, t, f, _f));
     }
 
     // spot r(u) = (int_0^u f(t) dt)/u
     template<class T, class F>
-    inline F spot(const T& u, size_t n, const T* t, const F* f, const F& _f = std::numeric_limits<F>::quiet_NaN()) noexcept
+    inline F spot(const T& u, size_t n, const T* t, const F* f, 
+        const F& _f = std::numeric_limits<F>::quiet_NaN()) noexcept
     {
         return u <= t[0] ? f[0] : integral(u, n, t, f, _f) / u;
     }
@@ -84,7 +85,8 @@ namespace fms::pwflat {
 
     // present value of instrument having cash flow c[i] at time u[i]
     template<class T, class F>
-    inline F present_value(size_t m, const T* u, const F* c, size_t n, const T* t, const F* f, const F& _f = NaN<F>()) noexcept
+    inline F present_value(size_t m, const T* u, const F* c, size_t n, const T* t, const F* f, 
+        const F& _f = std::numeric_limits<F>::quiet_NaN()) noexcept
     {
         F p{ 0 };
 
@@ -96,7 +98,8 @@ namespace fms::pwflat {
 
     // derivative of present value wrt parallel shift of forward curve
     template<class T, class F>
-    inline F duration(size_t m, const T* u, const F* c, size_t n, const T* t, const F* f, const F& _f = NaN()) noexcept
+    inline F duration(size_t m, const T* u, const F* c, size_t n, const T* t, const F* f, 
+        const F& _f = std::numeric_limits<F>::quiet_NaN()) noexcept
     {
         F d{ 0 };
 
@@ -109,7 +112,8 @@ namespace fms::pwflat {
 
     // derivative of present value wrt parallel shift of forward curve after last curve time
     template<class T, class F>
-    inline F partial_duration(size_t m, const T* u, const F* c, size_t n, const T* t, const F* f, const F& _f = NaN()) noexcept
+    inline F partial_duration(size_t m, const T* u, const F* c, size_t n, const T* t, const F* f, 
+        const F& _f = std::numeric_limits<X>::quiet_NaN()) noexcept
     {
         F d{ 0 };
 
