@@ -110,16 +110,12 @@ void test_fms_pwflat()
         T u_[] = { T(-.5), T(0), T(.5), T(1), T(1.5), T(2), T(2.5), T(3), T(3.5) };
         T f_[] = { T(.1), T(.1), T(.1), T(.1), T(.2 / 1.5), T(.3 / 2), T(.45 / 2.5), T(.6 / 3), T(.7 / 3.5) };
         for (int i = 0; i < 9; i++) {
-            if (i == 8) {
+            if (i == 0 || i == 8) {
                 assert(isnan(spot(u_[i], t.size(), t.data(), f.data())));
             }
             else {
                 assert(fabs(f_[i] - spot(u_[i], t.size(), t.data(), f.data())) < 2 * eps);
             }
-        }
-
-        for (int i = 0; i < sizeof(u_) / sizeof(u_[0]); i++) {
-            assert(fabs(f_[i] - spot(u_[i], t.size(), t.data(), f.data(), T(0.2))) < 2 * eps);
         }
     }
     { // present_value

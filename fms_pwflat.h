@@ -1,17 +1,4 @@
 // fms_pwflat.h - piecewise flat curve
-/*
-    f(t) = f[i] if t[i-1] < t <= t[i]
-         = _f   if t > t[n-1]
-    and undefined if t < 0
-    Note f(0) = f[0].
-
-    |                                   _f
-    |        f[1]             f[n-1] (--------
-    | f[0] (----- ...       (------]
-    [------]      ... ------]
-    |
-    0-----t[0]--- ... ---t[n-2]---t[n-1]
-*/
 #pragma once
 #include <cmath>     // exp
 #include <algorithm> // adjacent_find
@@ -28,17 +15,17 @@ namespace fms::pwflat {
     }
 
     // piecewise flat curve
-    // return f[i] if t[i-1] < u <= t[i], _f if u > t[n-1]
-    // assumes t[i] monotonically increasing
+    // return f[i] if t[i-1] < u <= t[i], _f if u > t[n-1], and NaN otherwise
     template<class T, class F>
     inline F value(const T& u, size_t n, const T* t, const F* f, 
         const F& _f = std::numeric_limits<F>::quiet_NaN()) noexcept
     {
-        if (u < 0 || !strictly_increasing(n, t))
+#ifdef _DEBUG
+        if (!strictly_increasing(n, t))
             return std::numeric_limits<F>::quiet_NaN();
-
-        if (n == 0)
-            return _f;
+#endif
+        if (u < 0)
+            return std::numeric_limits<F>::quiet_NaN();
 
         auto ti = std::lower_bound(t, t + n, u);
 
@@ -50,7 +37,11 @@ namespace fms::pwflat {
     inline F integral(const T& u, size_t n, const T* t, const F* f, 
         const F& _f = std::numeric_limits<F>::quiet_NaN()) noexcept
     {
-        if (u < 0 || !strictly_increasing(n, t))
+#ifdef _DEBUG
+        if (!strictly_increasing(n, t))
+            return std::numeric_limits<F>::quiet_NaN();
+#endif
+        if (u < 0)
             return std::numeric_limits<F>::quiet_NaN();
 
         F I{ 0 };
@@ -79,6 +70,9 @@ namespace fms::pwflat {
     inline F spot(const T& u, size_t n, const T* t, const F* f, 
         const F& _f = std::numeric_limits<F>::quiet_NaN()) noexcept
     {
+        if (u < 0)
+            return std::numeric_limits<F>::quiet_NaN();
+
         return u <= t[0] ? f[0] : integral(u, n, t, f, _f) / u;
     }
 
